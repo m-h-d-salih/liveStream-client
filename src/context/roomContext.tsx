@@ -43,13 +43,18 @@ export const RoomProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log("Peer Connected with ID:", id);
       setMe(peer);
     });
-
+    
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        console.log("User Media Stream Acquired");
-        setStream(stream);
-      })
-      .catch((error) => console.error("Media Error:", error));
+    .then((stream) => {
+      console.log("✅ User Media Stream Acquired", stream);
+      setStream(stream);
+    })
+    .catch((error) => {
+      console.error("❌ Media Error:", error);
+      console.error("Error Name:", error.name);
+      console.error("Error Message:", error.message);
+    });
+  
 
     ws.on('room-created', enterRoom);
     ws.on('get-users', getUsers);
@@ -57,7 +62,10 @@ export const RoomProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return () => {
       console.log("Cleaning up Peer and Socket connections...");
-      peer.destroy();
+    
+      if (peer && !peer.destroyed) {
+        peer.destroy();
+      }
       ws.off('room-created', enterRoom);
       ws.off('get-users', getUsers);
       ws.off('user-disconnected', removePeer);
@@ -101,11 +109,11 @@ export const RoomProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
     });
 
-    return () => {
-      console.log("Cleaning up user-joined and call listeners...");
-      ws.off('user-joined');
-      me.off('call');
-    };
+    // return () => {
+    //   console.log("Cleaning up user-joined and call listeners...");
+    //   ws.off('user-joined');
+    //   me.off('call');
+    // };
   }, [me, stream]);
 
   console.log("Current Peers:", peers);

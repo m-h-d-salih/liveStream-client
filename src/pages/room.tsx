@@ -7,7 +7,6 @@ import { PeerState } from '../context/peerReducer';
 const Room = () => {
     const {id}=useParams();
     const {ws,me,stream,peers}=useContext(RoomContext);
-   
     useEffect(()=>{
        if(me) ws.emit('join-room',{roomId:id,peerId:me._id});
     },[id,me,ws])
